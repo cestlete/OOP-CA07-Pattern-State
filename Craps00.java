@@ -6,7 +6,7 @@ class Main {
     static boolean craps = false;
     static boolean playPointGame = false;
     static int credits = 10;    //example 10credits to start
-						
+    static int lastRoll;
 
 
     public static void main(String[] args) {
@@ -14,38 +14,42 @@ class Main {
         System.out.println("Welcome");
 
         do {
-            askIfLikeToPlay();
-			// (1) Credits should be printed at the end of each round
-            printCredits();
+            askIfLikeToPlay();						   
             askPlayerToRoll();
             int rolled = rollDice();
             System.out.println("You rolled: " + rolled);
             checkPlayPointGame(rolled);
 
-			// (2) should add the "rolled" parameter
+			// (2) add the "rolled" parameter
             if (playPointGame) {
-                playPointGame();
+                playPointGame(rolled);
             } else {
-                playCraps();
-            }						   
+                playCraps(rolled);
+            }
+			// (1) print credits
+            printCredits();
 
         } while (!craps);
     }
 
-    static void playCraps() {
+    static void playCraps(int rolled) {
         System.out.println("do - play craps code");
-        simulateWinOrLoose();
+        simulateWinOrLoose(rolled);
     }
 
-    static void playPointGame() {
+    static void playPointGame(int rolled) {
         System.out.println("do - play point game code");
-        simulateWinOrLoose();
+        simulateWinOrLoose(rolled);
     }
 
     static void checkPlayPointGame(int rolled) {
-		// (3) "First roll" and "non-first roll" should be judged differently.						
-        playPointGame = rolled != 7 && rolled != 11 && rolled != 2
-                && rolled != 3 && rolled != 12;	   
+		// (3) Depending on whether it is the "first roll" or not, the judgement is different.
+        if (firstTime) {
+            playPointGame = rolled != 7 && rolled != 11 && rolled != 2
+                    && rolled != 3 && rolled != 12;
+        }else {
+            playPointGame = rolled != 7 && rolled != lastRoll;
+        }
     }
 
     static int rollDice() {
@@ -76,27 +80,56 @@ class Main {
     static void askIfLikeToPlay()        //definition
     {
         if (firstTime) {
-            System.out.println("play");
-			// (4) The boolean should be changed after the "first roll".
-            firstTime = false;
+            System.out.println("play");							  
         } else {
             System.out.println("play again");
         }
     }
 
-    static void simulateWinOrLoose() {
-		// (5) Wrong way to judge "crap" or "pointgame".
-        if (Math.random() > .5) {
-						
-											  
-            System.out.println("Simulated Win");														
-			 credits += 5;		 
-	} else {									 
-            System.out.println("Simulated Loose");													   
-            System.out.println("Setting craps to true");
-            craps = true; //set craps boolean to true
-
-            System.out.println("game will now end...");
+    static void simulateWinOrLoose(int rolled) {
+        // (5) Different rules for "first time" and "non-first time"
+        if (firstTime) {
+            if (rolled == 7 || rolled == 11) {
+                System.out.println("Simulated Win!");
+                System.out.println("Setting craps to true");
+                craps = true; //set craps boolean to true
+                credits += 5;
+                System.out.println("game will now end...");
+            } else if (rolled == 2 || rolled == 3 || rolled == 12) {
+                System.out.println("Simulated Loose!");
+                System.out.println("Setting craps to true");
+                craps = true; //set craps boolean to true
+                credits -= 5;
+                System.out.println("game will now end...");
+            } else {
+                System.out.println("Simulated Point Game");
+                System.out.println("Setting playPointGame to true");
+                System.out.println("game will go on...");
+                // (6) If the game needs to continue, record the number of points for this time.
+                lastRoll = rolled;
+            }
+			// (4) The boolean should be changed after the "first roll".
+            firstTime = false;
+        } else {
+            if (rolled == lastRoll) {
+                System.out.println("Simulated Win!");
+                System.out.println("Setting craps to true");
+                craps = true; //set craps boolean to true
+                credits += 5;
+                System.out.println("game will now end...");
+            } else if (rolled == 7) {
+                System.out.println("Simulated Loose!");
+                System.out.println("Setting craps to true");
+                craps = true; //set craps boolean to true
+                credits -= 5;
+                System.out.println("game will now end...");
+            } else {
+                System.out.println("Simulated Point Game");
+                System.out.println("Setting playPointGame to true");
+                playPointGame = true;
+                System.out.println("game will go on...");
+                lastRoll = rolled;
+            }
         }
     }
 }
